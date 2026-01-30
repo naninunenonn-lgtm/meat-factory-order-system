@@ -1,3 +1,7 @@
+<h7 style="color:red;">
+  ★★ JSP が確実に表示されています ★★
+</h7>
+
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
@@ -14,7 +18,9 @@
     <link rel="stylesheet"
           href="${pageContext.request.contextPath}/css/style.css">
 </head>
+
 <body class="bg-light">
+
 
 <div class="container mt-5">
     <div class="row justify-content-center">

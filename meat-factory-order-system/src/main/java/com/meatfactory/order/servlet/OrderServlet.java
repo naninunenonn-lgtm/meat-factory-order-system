@@ -1,6 +1,7 @@
 package com.meatfactory.order.servlet;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import com.meatfactory.order.dao.DBUtil;
 import com.meatfactory.order.model.Meat;
 import com.meatfactory.order.model.MeatMaster;
 import com.meatfactory.order.model.OrderItem;
@@ -23,6 +25,16 @@ public class OrderServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+    	System.out.println("★★ OrderServlet doGet が呼ばれました ★★");
+    	
+        // ===== DB接続確認 =====
+        try (Connection con = DBUtil.getConnection()) {
+            System.out.println("★★ Servlet から DB接続成功 ★★");
+        } catch (Exception e) {
+            System.out.println("★★ Servlet から DB接続失敗 ★★");
+            e.printStackTrace();
+        }    	
+    	
     	//肉マスタを呼び出す
     	List<Meat> meatList = MeatMaster.getMeatList();
 

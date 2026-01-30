@@ -14,6 +14,13 @@ public class DBUtil {
 
     // DB接続を取得するメソッド
     public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("PostgreSQL JDBCドライバが見つかりません（クラスパス未配備）", e);
+        }
+
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
+
 }
