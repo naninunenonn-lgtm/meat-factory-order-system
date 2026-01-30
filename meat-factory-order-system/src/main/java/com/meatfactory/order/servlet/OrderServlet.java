@@ -10,6 +10,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import com.meatfactory.order.dao.DBUtil;
 import com.meatfactory.order.model.Meat;
@@ -34,12 +35,48 @@ public class OrderServlet extends HttpServlet {
             System.out.println("★★ Servlet から DB接続失敗 ★★");
             e.printStackTrace();
         }    	
-    	
+        
     	//肉マスタを呼び出す
     	List<Meat> meatList = MeatMaster.getMeatList();
 
         // JSP に渡す
         request.setAttribute("meatList", meatList);
+        
+        // ★ PRG：結果表示用（GET）
+        String view = request.getParameter("view");
+        if ("result".equals(view)) {
+            HttpSession session = request.getSession(false);
+            if (session == null) {
+                response.sendRedirect(request.getContextPath() + "/order");
+                return;
+            }
+            
+            @SuppressWarnings("unchecked")
+            List<OrderItem> orderItemList =
+                    (List<OrderItem>) session.getAttribute("orderItemList");
+            Integer totalPrice = (Integer) session.getAttribute("totalPrice");
+
+            // session に結果が無いなら入力へ戻す
+            if (orderItemList == null || totalPrice == null) {
+                response.sendRedirect(request.getContextPath() + "/order");
+                return;
+            }
+            
+         // JSP用に request に移す
+            request.setAttribute("orderItemList", orderItemList);
+            request.setAttribute("totalPrice", totalPrice);
+            
+         // ★使い終わったら消す（リロードで同じ結果が残らないように）
+            session.removeAttribute("orderItemList");
+            session.removeAttribute("totalPrice");
+            
+            request.getRequestDispatcher("/WEB-INF/jsp/orderResult.jsp")
+            .forward(request, response);
+     return;
+        }
+
+            
+        
 
         request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp")
                .forward(request, response);
@@ -198,12 +235,14 @@ public class OrderServlet extends HttpServlet {
             totalPrice += item.getSubtotal();
         }
 
-        //箱ごと JSP に渡す
-        //orderItemList（List<OrderItem>）を"orderItemList" という名前でJSP に渡している
-        request.setAttribute("orderItemList", orderItemList);
-        request.setAttribute("totalPrice", totalPrice);
 
-        request.getRequestDispatcher("/WEB-INF/jsp/orderResult.jsp")
-               .forward(request, response);
+        //orderItemList（List<OrderItem>）を"orderItemList" という名前でJSP に渡している
+        HttpSession session = request.getSession();
+        session.setAttribute("orderItemList", orderItemList);
+        session.setAttribute("totalPrice", totalPrice);
+
+        // ★ PRG：POSTの後は redirect（GETで結果表示）
+        response.sendRedirect(request.getContextPath() + "/order?view=result");
+
     }
 }

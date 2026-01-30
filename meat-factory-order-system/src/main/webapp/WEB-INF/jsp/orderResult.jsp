@@ -38,6 +38,7 @@
 
 <p><strong>合計金額：${totalPrice} 円</strong></p>
 
-<a href="order">注文画面に戻る</a>
+<a href="${pageContext.request.contextPath}/order">注文画面に戻る</a>
+
 </body>
 </html>
