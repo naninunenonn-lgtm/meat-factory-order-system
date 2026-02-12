@@ -1,7 +1,3 @@
-<h7 style="color:red;">
-  ★★ JSP が確実に表示されています ★★
-</h7>
-
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
@@ -52,7 +48,7 @@
                     </c:if>
 
                     <!-- フォーム -->
-                    <form action="${pageContext.request.contextPath}/order/confirm" method="post">
+                    <form action="${pageContext.request.contextPath}/order/confirm" method="post" novalidate>
 
                         <table class="table table-bordered align-middle">
                             <thead class="table-secondary">
@@ -65,14 +61,13 @@
 
                             <tbody>
                                 <c:forEach var="meat" items="${meatList}" varStatus="status">
-                                    <tr class="${errorRowFlags != null && errorRowFlags[status.index] ? 'table-danger' : ''}">
+                                    <tr class="${not empty errorRowFlags and errorRowFlags[status.index] ? 'table-danger' : ''}">
                                         <td>${meat.name}</td>
                                         <td>${meat.price}</td>
                                         <td>
                                             <input type="hidden" name="meatType" value="${meat.code}">
                                             <input type="number"
                                                    name="quantity"
-                                                   min="0"
                                                    class="form-control"
                                                    value="${not empty quantities ? quantities[status.index] : ''}">
                                         </td>
@@ -96,10 +91,6 @@
         </div>
     </div>
 </div>
-
-</body>
-
-
 
 </body>
 </html>
