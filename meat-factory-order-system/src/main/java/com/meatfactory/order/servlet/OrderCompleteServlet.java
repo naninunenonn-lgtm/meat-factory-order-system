@@ -117,13 +117,24 @@ public class OrderCompleteServlet extends HttpServlet {
      // ★ここで先に session を作る（これがポイント）
         HttpSession session = request.getSession();
 
-        // ⑥ 本来ここでDB保存（あとでDAOをここに差し込む）
      // ⑥ 本来ここでDB保存（DAOを差し込む）
         try {
             com.meatfactory.order.dao.OrderDao orderDao = new com.meatfactory.order.dao.OrderDao();
 
             // 学習用：取引先はまだ未実装なので null でOK
+         // ★confirmから来た customerId（空なら未選択）
+            String customerIdStr = request.getParameter("customerId");
+
+            // 空文字なら null、数字なら Long に変換
             Long customerId = null;
+            if (customerIdStr != null && !customerIdStr.isEmpty()) {
+                try {
+                    customerId = Long.parseLong(customerIdStr);
+                } catch (NumberFormatException e) {
+                    // 改ざんなど。今回はnull扱いにする（厳密にするならエラーにして戻す）
+                    customerId = null;
+                }
+            }
 
             // orders.order_date は今日にする（入力画面で日付を選ぶなら後で差し替え）
             java.time.LocalDate orderDate = java.time.LocalDate.now();
@@ -166,20 +177,26 @@ public class OrderCompleteServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // ① session から、確定直後に保存したデータを取り出す
         HttpSession session = request.getSession();
+
         Object items = session.getAttribute("orderItemList");
         Object total = session.getAttribute("totalPrice");
 
-        // ② 1回表示したら消す（同じ完了画面を何度も出さないため）
+        // ★追加：orderIdを取り出す
+        Object orderId = session.getAttribute("orderId");
+
+        // 1回表示したら消す
         session.removeAttribute("orderItemList");
         session.removeAttribute("totalPrice");
+        session.removeAttribute("orderId"); // ★これも忘れず
 
-        // ③ JSPで表示できるように request属性へ移す
+        // requestに移す
         request.setAttribute("orderItemList", items);
         request.setAttribute("totalPrice", total);
 
-        // ④ 完了JSPへ遷移（forward）
+        // ★追加：JSPで使えるようにする
+        request.setAttribute("orderId", orderId);
+
         request.getRequestDispatcher("/WEB-INF/jsp/orderComplete.jsp")
                .forward(request, response);
     }

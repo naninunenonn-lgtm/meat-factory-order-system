@@ -5,6 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <title>注文内容確認</title>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet">
 </head>
@@ -56,6 +57,10 @@
             </form>
 
             <form action="${pageContext.request.contextPath}/order/complete" method="post">
+              <!-- ★取引先IDを次へ渡す -->
+  			<input type="hidden" name="customerId" value="${customerId}">
+            
+            
               <c:forEach var="item" items="${orderItemList}">
                 <input type="hidden" name="meatCode" value="${item.meatCode}">
                 <input type="hidden" name="quantity" value="${item.quantity}">

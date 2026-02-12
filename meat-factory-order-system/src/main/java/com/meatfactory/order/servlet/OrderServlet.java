@@ -9,9 +9,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+//追加import
+import com.meatfactory.order.dao.CustomerDao;
+import com.meatfactory.order.model.Customer;
 import com.meatfactory.order.model.Meat;
 import com.meatfactory.order.model.MeatMaster;
-
 /**
  * 注文入力画面を表示するサーブレット。
  *
@@ -29,30 +31,34 @@ public class OrderServlet extends HttpServlet {
      * - 肉マスタを取得して JSP に渡す
      * - 初回表示用に quantities（入力値の箱）も用意して JSP に渡す
      */
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException {
 
-        // ① 画面に表示する「肉マスタ」を取得する
-        //    （例：牛ロース / 価格… などの一覧）
-        List<Meat> meatList = MeatMaster.getMeatList();
+	    // ① 画面に表示する「肉マスタ」を取得
+	    List<Meat> meatList = MeatMaster.getMeatList();
+	    request.setAttribute("meatList", meatList);
 
-        // ② JSP が <c:forEach> で回すために request に渡す
-        request.setAttribute("meatList", meatList);
+	    // ② 取引先一覧をDBから取得して、プルダウンに出す
+	    try {
+	        CustomerDao customerDao = new CustomerDao();
+	        List<Customer> customerList = customerDao.findActive();
+	        request.setAttribute("customerList", customerList);
+	    } catch (Exception e) {
+	        // 学習用：DB不具合は画面で分かるようにメッセージ化
+	        e.printStackTrace();
+	        request.setAttribute("errorMessage", "取引先一覧の取得に失敗しました。DB接続を確認してください。");
+	    }
 
-        // ③ 初回表示用（入力値の配列）
-        //    - エラーで戻った時は OrderConfirmServlet が quantities をセットして戻します
-        //    - 初回は空の配列でOK
-        String[] quantities = new String[meatList.size()];
-        request.setAttribute("quantities", quantities);
+	    // ③ 初回表示用 quantities
+	    String[] quantities = new String[meatList.size()];
+	    request.setAttribute("quantities", quantities);
 
-        // ④ 入力画面 JSP へ遷移（forward）
-        request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp")
-               .forward(request, response);
-    }
+	    // ④ 取引先の初期値（未選択）
+	    request.setAttribute("customerId", "");
 
-    /**
-     * doPost は使いません。
-     * 入力→確認は /order/confirm にPOSTされ、OrderConfirmServlet が処理します。
-     */
+	    // ⑤ 入力画面へ
+	    request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp")
+	           .forward(request, response);
+	}
 }

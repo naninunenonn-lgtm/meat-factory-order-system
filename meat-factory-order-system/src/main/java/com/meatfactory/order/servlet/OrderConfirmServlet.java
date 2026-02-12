@@ -33,46 +33,46 @@ public class OrderConfirmServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // ① 文字化け対策（POSTのパラメータをUTF-8で読み取る）
         request.setCharacterEncoding("UTF-8");
 
-        // ② 肉マスタ（表示と単価の正しい情報に使う）
         List<Meat> meatList = MeatMaster.getMeatList();
 
-        // ③ 入力値取得
-        //    - meatType は hidden で行数分送られる
-        //    - quantity は入力欄（同名が複数）で行数分送られる
         String[] meatTypes = request.getParameterValues("meatType");
         String[] quantities = request.getParameterValues("quantity");
 
-        // ④ nullガード（基本は起きにくいが、安全に）
+        // ★取引先ID（空でもOK）
+        String customerIdStr = request.getParameter("customerId");
+        request.setAttribute("customerId", customerIdStr); // 戻し表示用（入力画面でselected維持）
+
+        
+
+        // nullガード
         if (meatTypes == null || quantities == null) {
             request.setAttribute("errorMessage", "入力情報の取得に失敗しました。もう一度やり直してください。");
-            request.setAttribute("meatList", meatList);
-            request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp").forward(request, response);
+            // ★入力画面に戻す時に必要なものを全部セットして戻す
+            forwardToInput(request, response, meatList, quantities);
             return;
         }
 
-        // ===== ここからバリデーション =====
-
-        // エラー文言をためる箱（JSPで一覧表示する）
+        // ===== バリデーション =====
         List<String> errorList = new ArrayList<>();
-
-        // どの行がエラーかを示すフラグ（行に赤色を付けるなどに使用）
         boolean[] errorRowFlags = new boolean[quantities.length];
 
+     // ★取引先が未選択ならエラー（必須）
+        if (customerIdStr == null || customerIdStr.trim().isEmpty()) {
+            errorList.add("取引先を選択してください。");
+
+            // ★JSPで赤枠にするためのフラグ
+            request.setAttribute("customerError", true);
+        }
+
+        boolean hasOrder = false; // ★ここで用意
+
         for (int i = 0; i < quantities.length; i++) {
-
             String qtyStr = quantities[i];
-
-            // (A) 未入力は「注文なし」とみなし、エラーにしない
-            if (qtyStr == null || qtyStr.isEmpty()) {
-                continue;
-            }
+            if (qtyStr == null || qtyStr.isEmpty()) continue;
 
             int qty;
-
-            // (B) 数値変換できるか（数値以外ならエラー）
             try {
                 qty = Integer.parseInt(qtyStr);
             } catch (NumberFormatException e) {
@@ -81,72 +81,51 @@ public class OrderConfirmServlet extends HttpServlet {
                 continue;
             }
 
-            // (C) マイナスはエラー
             if (qty < 0) {
                 errorList.add("数量は0以上で入力してください（行 " + (i + 1) + "）");
                 errorRowFlags[i] = true;
                 continue;
             }
 
-            // (D) 上限チェック（学習用ルール：100kgまで）
             if (qty > 100) {
                 errorList.add("数量は100kg以下で入力してください（行 " + (i + 1) + "）");
                 errorRowFlags[i] = true;
+                continue;
+            }
+
+            // ★ここまで来た qty は「数値で、0以上、100以下」
+            if (qty > 0) {
+                hasOrder = true;
             }
         }
 
-        // (E) エラーがあれば入力画面に戻す
+        // ★数量が全部0（または未入力）ならエラーに追加
+        if (!hasOrder) {
+            errorList.add("数量を1つ以上入力してください。");
+        }
+
+        // ★エラーが1つでもあれば全部出して戻す
         if (!errorList.isEmpty()) {
-            // 入力画面で再表示するため、必要な情報をrequestに詰める
             request.setAttribute("errorList", errorList);
             request.setAttribute("errorRowFlags", errorRowFlags);
-            request.setAttribute("quantities", quantities);
-            request.setAttribute("meatList", meatList);
-
-            request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp").forward(request, response);
+            forwardToInput(request, response, meatList, quantities);
             return;
         }
 
-        // ===== ここから確認画面用データ作成 =====
 
-        // 1つも注文が無い（全行 未入力/0）なら入力画面へ戻す
-        boolean hasOrder = false;
-        for (int i = 0; i < quantities.length; i++) {
-            if (quantities[i] == null || quantities[i].isEmpty()) continue;
 
-            try {
-                int qty = Integer.parseInt(quantities[i]);
-                if (qty > 0) {
-                    hasOrder = true;
-                    break;
-                }
-            } catch (NumberFormatException e) {
-                // ここには来ない想定（前のチェックで弾いている）だが念のため
-            }
-        }
-
-        if (!hasOrder) {
-            request.setAttribute("errorMessage", "数量を1つ以上入力してください。");
-            request.setAttribute("quantities", quantities);
-            request.setAttribute("meatList", meatList);
-            request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp").forward(request, response);
-            return;
-        }
-
-        // 確認画面に表示する注文リストを作る
+        // ===== 確認画面用データ作成 =====
         List<OrderItem> orderItemList = new ArrayList<>();
         int totalPrice = 0;
 
         for (int i = 0; i < meatTypes.length; i++) {
 
-            // quantity が空なら注文なし
             int qty = 0;
             if (quantities[i] != null && !quantities[i].isEmpty()) {
                 qty = Integer.parseInt(quantities[i]);
             }
             if (qty <= 0) continue;
 
-            // meatType（コード）から、肉マスタ情報（名前・単価）を探す
             Meat selectedMeat = null;
             for (Meat meat : meatList) {
                 if (meat.getCode().equals(meatTypes[i])) {
@@ -156,7 +135,6 @@ public class OrderConfirmServlet extends HttpServlet {
             }
             if (selectedMeat == null) continue;
 
-            // 注文明細を作る（小計は OrderItem 側のロジックで計算）
             OrderItem item = new OrderItem(
                     selectedMeat.getCode(),
                     selectedMeat.getName(),
@@ -169,12 +147,44 @@ public class OrderConfirmServlet extends HttpServlet {
             totalPrice += item.getSubtotal();
         }
 
-        // JSPへ渡す
         request.setAttribute("orderItemList", orderItemList);
         request.setAttribute("totalPrice", totalPrice);
 
-        // 確認画面へ
+        // customerId は confirm.jsp → complete へ hidden で渡すため必要
+        request.setAttribute("customerId", customerIdStr);
+
         request.getRequestDispatcher("/WEB-INF/jsp/orderConfirm.jsp")
                .forward(request, response);
     }
+
+    /**
+     * 入力画面に戻す時に「必ず必要になるデータ」をまとめてセットして forward する。
+     * これを使うと、戻り分岐ごとに setAttribute を書き忘れなくなる。
+     */
+    private void forwardToInput(HttpServletRequest request, HttpServletResponse response,
+                                List<Meat> meatList, String[] quantities)
+            throws ServletException, IOException {
+
+        // 入力画面の一覧（肉）
+        request.setAttribute("meatList", meatList);
+
+        // 入力値の復元（エラーで戻っても入力欄を維持する）
+        if (quantities != null) {
+            request.setAttribute("quantities", quantities);
+        }
+
+        // 取引先プルダウン表示に必要
+        try {
+            com.meatfactory.order.dao.CustomerDao customerDao = new com.meatfactory.order.dao.CustomerDao();
+            request.setAttribute("customerList", customerDao.findActive());
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 取引先一覧が取れない場合も、画面は出す（空になるだけ）
+        }
+
+        request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp")
+               .forward(request, response);
+    }
 }
+
+

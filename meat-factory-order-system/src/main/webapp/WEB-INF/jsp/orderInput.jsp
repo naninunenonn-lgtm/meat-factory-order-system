@@ -46,11 +46,35 @@
                             </ul>
                         </div>
                     </c:if>
+                    
+
 
                     <!-- フォーム -->
                     <form action="${pageContext.request.contextPath}/order/confirm" method="post" novalidate>
+                    <!-- 取引先選択（customer） -->
+					<div class="mb-3">
+					  <label class="form-label">取引先</label>
+					
+					  <select name="customerId"
+					          class="form-select ${not empty customerError ? 'is-invalid' : ''}">
+					    <option value="">-- 選択してください --</option>
+					
+					    <c:forEach var="c" items="${customerList}">
+					      <option value="${c.customerId}"
+					        <c:if test="${customerId == c.customerId}">selected</c:if>>
+					        ${c.code}：${c.name}
+					      </option>
+					    </c:forEach>
+					  </select>
+					
+					  <c:if test="${not empty customerError}">
+					    <div class="invalid-feedback">
+					      取引先を選択してください。
+					    </div>
+					  </c:if>
+					</div>
 
-                        <table class="table table-bordered align-middle">
+					<table class="table table-bordered align-middle">
                             <thead class="table-secondary">
                                 <tr>
                                     <th>肉の種類</th>

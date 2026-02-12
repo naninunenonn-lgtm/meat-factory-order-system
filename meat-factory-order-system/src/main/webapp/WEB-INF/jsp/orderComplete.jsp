@@ -33,6 +33,10 @@
           <!-- OrderCompleteServlet#doGet で request に入れたデータを表示 -->
           <!-- ========================= -->
 
+			<c:if test="${not empty orderId}">
+			  <p class="text-center">受付番号：${orderId}</p>
+			</c:if>
+
           <c:if test="${not empty orderItemList}">
             <table class="table table-bordered mt-4">
               <thead class="table-light">
