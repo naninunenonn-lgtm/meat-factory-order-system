@@ -196,8 +196,10 @@ public class OrderCompleteServlet extends HttpServlet {
 
         // ★追加：JSPで使えるようにする
         request.setAttribute("orderId", orderId);
+        
 
-        request.getRequestDispatcher("/WEB-INF/jsp/orderComplete.jsp")
+        request.setAttribute("contentPage", "/WEB-INF/jsp/orderComplete.jsp");
+        request.getRequestDispatcher("/WEB-INF/jsp/common/layout.jsp")
                .forward(request, response);
     }
 }

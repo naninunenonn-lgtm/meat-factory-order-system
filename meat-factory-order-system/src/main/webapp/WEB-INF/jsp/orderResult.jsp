@@ -1,9 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<!DOCTYPE html>
-<html>
-<head>
+
 <meta charset="UTF-8">
 <title>注文結果</title>
 	    <!-- Bootstrap -->
@@ -39,6 +37,3 @@
 <p><strong>合計金額：${totalPrice} 円</strong></p>
 
 <a href="${pageContext.request.contextPath}/order">注文画面に戻る</a>
-
-</body>
-</html>

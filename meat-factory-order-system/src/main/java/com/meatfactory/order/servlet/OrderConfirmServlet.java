@@ -149,11 +149,10 @@ public class OrderConfirmServlet extends HttpServlet {
 
         request.setAttribute("orderItemList", orderItemList);
         request.setAttribute("totalPrice", totalPrice);
-
-        // customerId は confirm.jsp → complete へ hidden で渡すため必要
         request.setAttribute("customerId", customerIdStr);
 
-        request.getRequestDispatcher("/WEB-INF/jsp/orderConfirm.jsp")
+        request.setAttribute("contentPage", "/WEB-INF/jsp/orderConfirm.jsp");
+        request.getRequestDispatcher("/WEB-INF/jsp/common/layout.jsp")
                .forward(request, response);
     }
 
@@ -162,29 +161,33 @@ public class OrderConfirmServlet extends HttpServlet {
      * これを使うと、戻り分岐ごとに setAttribute を書き忘れなくなる。
      */
     private void forwardToInput(HttpServletRequest request, HttpServletResponse response,
-                                List<Meat> meatList, String[] quantities)
-            throws ServletException, IOException {
+            List<Meat> meatList, String[] quantities)
+		throws ServletException, IOException {
+		
+		// ① 入力画面に必須：肉一覧
+		request.setAttribute("meatList", meatList);
+		
+		// ② 入力値復元：数量
+		if (quantities != null) {
+		request.setAttribute("quantities", quantities);
+		}
+		
+		// ③ 取引先プルダウンの中身（必須）
+		try {
+		com.meatfactory.order.dao.CustomerDao customerDao = new com.meatfactory.order.dao.CustomerDao();
+		request.setAttribute("customerList", customerDao.findActive());
+		} catch (Exception e) {
+		e.printStackTrace();
+		}
+		
+		// ★ここが重要：layoutで表示する「中身」を入力画面にする
+		request.setAttribute("contentPage", "/WEB-INF/jsp/orderInput.jsp");
+		
+		// ④ layout経由で戻す
+		request.getRequestDispatcher("/WEB-INF/jsp/common/layout.jsp")
+		.forward(request, response);
+}
 
-        // 入力画面の一覧（肉）
-        request.setAttribute("meatList", meatList);
-
-        // 入力値の復元（エラーで戻っても入力欄を維持する）
-        if (quantities != null) {
-            request.setAttribute("quantities", quantities);
-        }
-
-        // 取引先プルダウン表示に必要
-        try {
-            com.meatfactory.order.dao.CustomerDao customerDao = new com.meatfactory.order.dao.CustomerDao();
-            request.setAttribute("customerList", customerDao.findActive());
-        } catch (Exception e) {
-            e.printStackTrace();
-            // 取引先一覧が取れない場合も、画面は出す（空になるだけ）
-        }
-
-        request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp")
-               .forward(request, response);
-    }
 }
 
 

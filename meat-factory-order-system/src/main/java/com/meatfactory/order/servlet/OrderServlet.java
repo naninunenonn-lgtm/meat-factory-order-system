@@ -58,7 +58,8 @@ public class OrderServlet extends HttpServlet {
 	    request.setAttribute("customerId", "");
 
 	    // ⑤ 入力画面へ
-	    request.getRequestDispatcher("/WEB-INF/jsp/orderInput.jsp")
+	    request.setAttribute("contentPage", "/WEB-INF/jsp/orderInput.jsp");
+	    request.getRequestDispatcher("/WEB-INF/jsp/common/layout.jsp")
 	           .forward(request, response);
 	}
 }
