@@ -180,6 +180,16 @@ public class OrderConfirmServlet extends HttpServlet {
 		e.printStackTrace();
 		}
 		
+		// ★取引先の選択状態を維持
+		String cid = request.getParameter("customerId");
+		request.setAttribute("customerId", cid);
+
+		// ★未選択ならプルダウン赤枠も維持
+		if (cid == null || cid.trim().isEmpty()) {
+		    request.setAttribute("customerError", true);
+		}
+
+		
 		// ★ここが重要：layoutで表示する「中身」を入力画面にする
 		request.setAttribute("contentPage", "/WEB-INF/jsp/orderInput.jsp");
 		
