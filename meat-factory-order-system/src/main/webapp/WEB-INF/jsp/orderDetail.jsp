@@ -57,6 +57,7 @@
 			  <option value="CONFIRMED" ${detail.statusLabel == 'CONFIRMED' ? 'selected' : ''}>受付済</option>
 			  <option value="SHIPPED"   ${detail.statusLabel == 'SHIPPED'   ? 'selected' : ''}>出荷済</option>
 			  <option value="CANCELLED" ${detail.statusLabel == 'CANCELLED' ? 'selected' : ''}>キャンセル</option>
+			  <option value="HOLD" ${detail.statusLabel == 'HOID' ? 'selected' : ''}>保留</option>
 			</select>
         </div>
 

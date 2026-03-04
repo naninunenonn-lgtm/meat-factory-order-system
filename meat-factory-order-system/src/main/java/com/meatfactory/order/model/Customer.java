@@ -46,4 +46,5 @@ public class Customer {
     public boolean isActive() {
         return active;
     }
+    
 }
