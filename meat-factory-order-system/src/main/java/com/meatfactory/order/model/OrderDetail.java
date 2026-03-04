@@ -3,6 +3,8 @@ package com.meatfactory.order.model;
 import java.time.LocalDate;
 import java.util.List;
 
+
+
 /**
  * 注文詳細画面に必要なデータをまとめた入れ物。
  * - ヘッダ情報（注文ID/日付/取引先/ステータス）
@@ -27,11 +29,20 @@ public class OrderDetail {
         this.totalAmount = totalAmount;
         this.items = items;
     }
-
+    
     public int getOrderId() { return orderId; }
     public LocalDate getOrderDate() { return orderDate; }
     public String getCustomerName() { return customerName; }
     public String getStatus() { return status; }
     public int getTotalAmount() { return totalAmount; }
     public List<OrderDetailItem> getItems() { return items; }
+    
+    /**
+     * JSP表示用：ステータスを日本語に変換して返す
+     * JSPから ${detail.statusLabel} と書くと呼ばれる
+     */
+    public String getStatusLabel() {
+        return OrderStatus.label(status);
+    }
+
 }

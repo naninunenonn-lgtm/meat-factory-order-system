@@ -34,7 +34,7 @@
         </div>
 
         <div class="col-md-3"><strong>ステータス</strong></div>
-        <div class="col-md-9">${detail.status}</div>
+        <div class="col-md-9">${detail.statusLabel}</div>
         
       </div>
       	       <!-- ===== ステータス変更フォーム ===== -->
@@ -54,9 +54,9 @@
 
         <div class="col-auto">
 			<select name="status" class="form-select">
-			  <option value="CONFIRMED" ${detail.status == 'CONFIRMED' ? 'selected' : ''}>受付済</option>
-			  <option value="SHIPPED"   ${detail.status == 'SHIPPED'   ? 'selected' : ''}>出荷済</option>
-			  <option value="CANCELLED" ${detail.status == 'CANCELLED' ? 'selected' : ''}>キャンセル</option>
+			  <option value="CONFIRMED" ${detail.statusLabel == 'CONFIRMED' ? 'selected' : ''}>受付済</option>
+			  <option value="SHIPPED"   ${detail.statusLabel == 'SHIPPED'   ? 'selected' : ''}>出荷済</option>
+			  <option value="CANCELLED" ${detail.statusLabel == 'CANCELLED' ? 'selected' : ''}>キャンセル</option>
 			</select>
         </div>
 

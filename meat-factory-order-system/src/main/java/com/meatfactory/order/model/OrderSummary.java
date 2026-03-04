@@ -47,6 +47,10 @@ public class OrderSummary {
         this.status = status;
         this.totalAmount = totalAmount;
     }
+    
+    public String getStatusLabel() {
+        return OrderStatus.label(status);
+    }
 
     // ===== JSP表示用 getter =====
     public int getOrderId() { return orderId; }

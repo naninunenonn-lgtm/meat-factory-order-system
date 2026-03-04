@@ -116,7 +116,7 @@
                 </td>
                 <td>${o.orderDate}</td>
                 <td><c:out value="${o.customerName}" default="(未設定)"/></td>
-                <td>${o.status}</td>
+                <td>${o.statusLabel}</td>
                 <td class="text-end">${o.totalAmount}</td>
               </tr>
             </c:forEach>
