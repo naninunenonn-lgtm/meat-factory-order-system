@@ -68,6 +68,7 @@ public class OrderStatusUpdateServlet extends HttpServlet {
         boolean allowed =
                 "CONFIRMED".equals(status) ||
                 "SHIPPED".equals(status) ||
+                "HOLD".equals(status) ||
                 "CANCELLED".equals(status);
 
         if (!allowed) {
