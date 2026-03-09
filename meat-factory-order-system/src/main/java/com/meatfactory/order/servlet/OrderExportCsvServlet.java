@@ -12,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import com.meatfactory.order.dao.OrderExportDao;
 import com.meatfactory.order.model.OrderItemCsvRow;
@@ -22,7 +23,7 @@ import com.meatfactory.order.model.OrderItemCsvRow;
  * URL:
  *   GET /order/exportCsv?customerId=...&from=...&to=...
  *
- * 重要ポイント：
+ * 
  * - JSPへ forward しない
  * - response に CSV文字列を直接書き込む
  * - Content-Disposition を付けると「ファイルダウンロード」になる
@@ -33,6 +34,14 @@ public class OrderExportCsvServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+    	
+    	
+        // 未ログインならログイン画面へ戻す
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("loginUser") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         // =========================================================
         // ① 検索条件を取得する（一覧画面と同じクエリパラメータ）

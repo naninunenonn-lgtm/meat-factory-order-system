@@ -7,8 +7,6 @@ import java.sql.SQLException;
 /**
  * DB接続を作るための共通ユーティリティ。
  *
- * DAO（例：MeatDao）は、毎回DB接続が必要になるので
- * 「接続の作り方」をここにまとめておくとコードが散らばらずに済みます。
  */
 public class DBUtil {
 

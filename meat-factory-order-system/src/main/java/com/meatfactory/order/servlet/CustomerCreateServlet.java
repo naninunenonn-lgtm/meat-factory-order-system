@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import com.meatfactory.order.dao.CustomerDao;
 
@@ -14,7 +15,6 @@ import com.meatfactory.order.dao.CustomerDao;
  * 取引先をDBへ登録するサーブレット
  *
  * URL:
- *   POST /master/customer/create
  *
  * 役割：
  *   フォーム値を受け取る
@@ -27,6 +27,13 @@ public class CustomerCreateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+    	    	
+        // 未ログインならログイン画面へ戻す
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("loginUser") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
 
         request.setCharacterEncoding("UTF-8");
 

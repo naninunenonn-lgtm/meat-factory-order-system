@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
 <meta charset="UTF-8">
-<title>精肉工場 受発注システム - 注文入力</title>
+<title>Meat Ordering System - 新規注文入力</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -23,7 +23,7 @@
             <!-- カード開始 -->
             <div class="card shadow">
                 <div class="card-header bg-primary text-white text-center">
-                    <h4 class="mb-0">精肉工場 受発注システム</h4>
+                    <h4 class="mb-0">Meat Ordering System</h4>
                 </div>
 
                 <div class="card-body">

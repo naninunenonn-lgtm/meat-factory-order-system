@@ -4,7 +4,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>精肉工場システム</title>
+<title>Meat Ordering System</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet">
@@ -46,22 +46,35 @@
 <div class="wrapper">
 
     <!-- 左メニュー -->
-    <div class="sidebar">
-        <h5 class="p-3 border-bottom">精肉工場</h5>
+<div class="sidebar">
 
-        <a href="${pageContext.request.contextPath}/order">
-            新規注文
-        </a>
+    <h5 class="p-3 border-bottom">Meat Ordering System</h5>
 
-        <a href="${pageContext.request.contextPath}/order/list">
-            注文一覧
-        </a>
-        
-        <a href="${pageContext.request.contextPath}/master/customer">
-    		取引先マスタ
-		</a>
-        
-    </div>
+    <c:if test="${not empty loginUser}">
+        <div class="px-3 py-2 border-bottom small">
+            ログイン中：${loginUser.userName}
+        </div>
+    </c:if>
+
+    <a href="${pageContext.request.contextPath}/order">
+        新規注文
+    </a>
+
+    <a href="${pageContext.request.contextPath}/order/list">
+        注文一覧
+    </a>
+    
+    <a href="${pageContext.request.contextPath}/master/customer">
+        取引先マスタ
+    </a>
+
+    <!-- 一番下に固定 -->
+    <a href="${pageContext.request.contextPath}/logout"
+       style="margin-top:auto; border-top:1px solid #495057;">
+        ログアウト
+    </a>
+
+</div>
 
     <!-- 右側：中身差し込み -->
     <div class="content">

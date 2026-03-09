@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 //追加import
 import com.meatfactory.order.dao.CustomerDao;
@@ -34,6 +35,13 @@ public class OrderServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	        throws ServletException, IOException {
+		
+	    // 未ログインならログイン画面へ戻す
+	    HttpSession session = request.getSession(false);
+	    if (session == null || session.getAttribute("loginUser") == null) {
+	        response.sendRedirect(request.getContextPath() + "/login");
+	        return;
+	    }
 
 	    // ① 画面に表示する「肉マスタ」を取得
 	    List<Meat> meatList = MeatMaster.getMeatList();

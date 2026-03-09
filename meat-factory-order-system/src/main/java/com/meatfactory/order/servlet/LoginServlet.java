@@ -1,306 +1,137 @@
-/*
- * =========================================================
- * package
- * =========================================================
- * パッケージ宣言
- *
- * クラスが所属するフォルダのようなもの
- * Javaでは必ずパッケージの中にクラスを置く
- */
 package com.meatfactory.order.servlet;
 
-
-/*
- * =========================================================
- * import
- * =========================================================
- * 他のクラスを使うための宣言
- *
- * Javaでは別パッケージのクラスを使うとき import が必要
- */
-
-/* IOException
- * 種類：クラス
- * 用途：入出力エラー
- */
 import java.io.IOException;
 
-/* RequestDispatcher
- * 種類：クラス
- * 用途：JSPへ画面遷移する
- */
 import jakarta.servlet.RequestDispatcher;
-/* ServletException
- * 種類：クラス
- * 用途：Servlet処理中の例外
- */
 import jakarta.servlet.ServletException;
-/* WebServlet
- * 種類：アノテーション
- * 用途：このクラスがServletであることを宣言する
- */
 import jakarta.servlet.annotation.WebServlet;
-/* HttpServlet
- * 種類：クラス
- * 用途：Servletの親クラス
- */
 import jakarta.servlet.http.HttpServlet;
-/* HttpServletRequest
- * 種類：クラス
- * 用途：ブラウザから送られた情報を持つオブジェクト
- */
 import jakarta.servlet.http.HttpServletRequest;
-/* HttpServletResponse
- * 種類：クラス
- * 用途：ブラウザへ返す情報を操作する
- */
 import jakarta.servlet.http.HttpServletResponse;
-/* HttpSession
- * 種類：クラス
- * 用途：ログイン状態などを保持する
- */
 import jakarta.servlet.http.HttpSession;
 
-/* UserDao
- * 種類：クラス（DAO）
- * 用途：DBからユーザーを取得する
- */
 import com.meatfactory.order.dao.UserDao;
-/* User
- * 種類：クラス（モデル）
- * 用途：ユーザー情報を保持
- */
 import com.meatfactory.order.model.User;
 
-
-
-/*
- * =========================================================
- * @WebServlet
- * =========================================================
+/**
+ * LoginServlet
+ * ログイン処理を担当するServlet
  *
- * 種類：アノテーション
+ * 【目的】
+ * ログイン画面の表示とログイン認証処理を行う。
+ * login.jsp から送信されたログインID・パスワードを受け取り、
+ * usersテーブルを検索してユーザー認証を行う。
  *
- * URLとServletを紐づける
+ * 【GET】
+ * ログイン画面を表示する
  *
- * /login にアクセスすると
- * このServletが呼ばれる
+ * 【POST】
+ * ログインID・パスワードを受け取り、認証する
+ *
+ * 【処理の流れ】
+ * 1. フォームから loginId / password を取得
+ * 2. UserDao を使って usersテーブルを検索
+ * 3. ユーザーが存在しない → login.jsp に戻す
+ * 4. ユーザーが存在する → セッションに loginUser を保存
+ * 5. 注文一覧画面へリダイレクト
+ *
+ * 【URL】
+ * /login
  */
 @WebServlet("/login")
-
-
-
-/*
- * =========================================================
- * クラス定義
- * =========================================================
- *
- * public
- * 種類：アクセス修飾子
- * 意味：他のクラスからアクセス可能
- *
- * class
- * 種類：キーワード
- * 意味：クラス定義
- *
- * LoginServlet
- * 種類：クラス名
- *
- * extends
- * 種類：キーワード
- * 意味：継承
- *
- * HttpServlet
- * 種類：クラス（親クラス）
- *
- * つまり
- *
- * LoginServlet は
- * HttpServlet を継承したクラス
- */
 public class LoginServlet extends HttpServlet {
 
-
-
-    /*
-     * =========================================================
-     * doPost メソッド
-     * =========================================================
+    /**
+     * ログイン画面表示
      *
-     * protected
-     * 種類：アクセス修飾子
-     *
-     * void
-     * 種類：戻り値
-     * 意味：戻り値なし
-     *
-     * doPost
-     * 種類：メソッド名
-     *
-     * HttpServletRequest request
-     * 種類：オブジェクト
-     * 用途：ブラウザから送られた情報
-     *
-     * HttpServletResponse response
-     * 種類：オブジェクト
-     * 用途：ブラウザへ返す処理
-     *
-     * throws
-     * 種類：例外宣言
+     * @param request  HTTPリクエスト
+     * @param response HTTPレスポンス
+     * @throws ServletException サーブレット処理エラー
+     * @throws IOException      入出力エラー
      */
+    @Override
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response)
+            throws ServletException, IOException {
+
+        RequestDispatcher rd =
+                request.getRequestDispatcher("/WEB-INF/jsp/auth/login.jsp");
+        rd.forward(request, response);
+    }
+
+    /**
+     * ログインフォーム送信（POST）の処理
+     *
+     * @param request  ブラウザから送信されたリクエスト情報
+     *                 ・フォーム入力値
+     *                 ・セッション
+     *
+     * @param response ブラウザへ返すレスポンス
+     *                 ・画面遷移
+     *
+     * @throws ServletException サーブレット処理エラー
+     * @throws IOException      入出力エラー
+     */
+    @Override
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response)
             throws ServletException, IOException {
 
-
-
-        /*
-         * =====================================================
-         * request.getParameter
-         * =====================================================
-         *
-         * request
-         * 種類：オブジェクト
-         *
-         * getParameter
-         * 種類：メソッド
-         *
-         * 用途
-         * フォームから送信された値を取得
-         */
-
+        // ===============================
+        // ① フォーム入力値を取得
+        // ===============================
         String loginId = request.getParameter("loginId");
-
         String password = request.getParameter("password");
 
+        // ===============================
+        // ② 入力チェック
+        // ===============================
+        if (loginId == null || loginId.isBlank()
+                || password == null || password.isBlank()) {
 
+            request.setAttribute("error", "ログインIDとパスワードを入力してください");
+
+            RequestDispatcher rd =
+                    request.getRequestDispatcher("/WEB-INF/jsp/auth/login.jsp");
+
+            rd.forward(request, response);
+            return;
+        }
 
         try {
 
-            /*
-             * UserDao dao
-             *
-             * UserDao
-             * 種類：クラス
-             *
-             * dao
-             * 種類：変数
-             *
-             * new
-             * 種類：キーワード
-             * 用途：インスタンス生成
-             */
-
+            // ===============================
+            // ③ DBからユーザー検索
+            // ===============================
             UserDao dao = new UserDao();
+            User user = dao.findByLogin(loginId, password);
 
+            // ===============================
+            // ④ ユーザーが見つからない場合
+            // ===============================
+            if (user == null) {
 
-
-            /*
-             * dao.findByLogin()
-             *
-             * dao
-             * 種類：オブジェクト
-             *
-             * findByLogin
-             * 種類：メソッド
-             *
-             * 戻り値
-             * Userオブジェクト
-             */
-
-            User user = dao.findByLogin(loginId,password);
-
-
-
-            /*
-             * if
-             * 種類：制御構文
-             */
-
-            if(user == null){
-
-                /*
-                 * request.setAttribute
-                 *
-                 * 種類：メソッド
-                 *
-                 * 用途
-                 * JSPへ値を渡す
-                 */
-
-                request.setAttribute("error","ログイン失敗");
-
-
-
-                /*
-                 * RequestDispatcher
-                 * 種類：クラス
-                 */
+                request.setAttribute("error", "ログインIDまたはパスワードが違います");
 
                 RequestDispatcher rd =
-                        request.getRequestDispatcher("/login.jsp");
+                        request.getRequestDispatcher("/WEB-INF/jsp/auth/login.jsp");
 
-
-
-                /*
-                 * forward
-                 * 種類：メソッド
-                 *
-                 * 同じリクエストで
-                 * JSPへ画面遷移
-                 */
-
-                rd.forward(request,response);
-
+                rd.forward(request, response);
                 return;
             }
 
-
-
-            /*
-             * HttpSession
-             * 種類：クラス
-             */
-
+            // ===============================
+            // ⑤ ログイン成功
+            // ===============================
             HttpSession session = request.getSession();
-
-
-
-            /*
-             * session.setAttribute
-             *
-             * 種類：メソッド
-             *
-             * loginUser
-             * 種類：セッションキー
-             */
-
             session.setAttribute("loginUser", user);
 
+            // ===============================
+            // ⑥ 注文一覧画面へ移動
+            // ===============================
+            response.sendRedirect(request.getContextPath() + "/order");
 
-
-            /*
-             * response.sendRedirect
-             *
-             * 種類：メソッド
-             *
-             * 新しいリクエストで
-             * 別ページへ移動
-             */
-
-            response.sendRedirect("menu");
-
-
-
-        } catch(Exception e){
-
-            /*
-             * throw
-             * 種類：キーワード
-             *
-             * 例外を投げる
-             */
-
+        } catch (Exception e) {
             throw new ServletException(e);
         }
     }

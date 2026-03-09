@@ -39,6 +39,15 @@ public class OrderCompleteServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+    	
+    	
+        // 未ログインならログイン画面へ戻す
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("loginUser") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
 
         // ① 文字化け対策（POSTパラメータをUTF-8で読む）
         request.setCharacterEncoding("UTF-8");
@@ -114,8 +123,6 @@ public class OrderCompleteServlet extends HttpServlet {
             return;
         }
         
-     // ★ここで先に session を作る（これがポイント）
-        HttpSession session = request.getSession();
 
      // ⑥ 本来ここでDB保存（DAOを差し込む）
         try {

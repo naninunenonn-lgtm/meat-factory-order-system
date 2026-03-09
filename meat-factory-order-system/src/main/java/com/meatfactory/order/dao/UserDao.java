@@ -65,7 +65,7 @@ public class UserDao {
         }
 
         /*
-         * 見つからなかったら null
+         * 見つからなかったら nullを返す
          */
         return null;
     }
