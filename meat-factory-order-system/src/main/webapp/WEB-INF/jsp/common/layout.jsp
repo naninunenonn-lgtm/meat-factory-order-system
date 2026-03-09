@@ -64,9 +64,11 @@
         注文一覧
     </a>
     
-    <a href="${pageContext.request.contextPath}/master/customer">
-        取引先マスタ
-    </a>
+	<c:if test="${loginUser.role == 'ADMIN'}">
+	    <a href="${pageContext.request.contextPath}/master/customer">
+	        取引先マスタ
+	    </a>
+	</c:if>
 
     <!-- 一番下に固定 -->
     <a href="${pageContext.request.contextPath}/logout"
